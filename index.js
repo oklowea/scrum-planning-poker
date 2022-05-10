@@ -1,8 +1,10 @@
+const path = require('path');
 const express = require('express');
-const app = express();
 const http = require('http');
+const { Server } = require('socket.io');
+
+const app = express();
 const server = http.createServer(app);
-const { Server } = require("socket.io");
 const io = new Server(server);
 
 let usersCount = 0;
@@ -17,7 +19,7 @@ function updateSelectedPrices() {
 }
 
 app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/index.html');
+  res.sendFile(path.join(__dirname, '/index.html'));
 });
 
 io.on('connection', (socket) => {
@@ -26,7 +28,7 @@ io.on('connection', (socket) => {
 
   socket.on('selected:option', (price) => {
     const selectedPrice = selectedPrices.find((o) => o.id === socket.id);
-    if(selectedPrice) {
+    if (selectedPrice) {
       selectedPrice.price = price;
     } else {
       selectedPrices.push({ id: socket.id, price });
