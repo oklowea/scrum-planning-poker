@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Online Scrum Planning</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <div data-js="options" class="flex justify-center my-10">
+      <div class="flex justify-center items-center w-12 h-20 bg-gray-200 hover:bg-sky-500/50 mr-2 rounded-md cursor-pointer">0</div>
+      <div class="flex justify-center items-center w-12 h-20 bg-gray-200 hover:bg-sky-500/50 mx-2 rounded-md cursor-pointer">1/2</div>
+      <div class="flex justify-center items-center w-12 h-20 bg-gray-200 hover:bg-sky-500/50 mx-2 rounded-md cursor-pointer">1</div>
+      <div class="flex justify-center items-center w-12 h-20 bg-gray-200 hover:bg-sky-500/50 mx-2 rounded-md cursor-pointer">2</div>
+      <div class="flex justify-center items-center w-12 h-20 bg-gray-200 hover:bg-sky-500/50 mx-2 rounded-md cursor-pointer">3</div>
+      <div class="flex justify-center items-center w-12 h-20 bg-gray-200 hover:bg-sky-500/50 mx-2 rounded-md cursor-pointer">5</div>
+      <div class="flex justify-center items-center w-12 h-20 bg-gray-200 hover:bg-sky-500/50 mx-2 rounded-md cursor-pointer">8</div>
+      <div class="flex justify-center items-center w-12 h-20 bg-gray-200 hover:bg-sky-500/50 mx-2 rounded-md cursor-pointer">13</div>
+      <div class="flex justify-center items-center w-12 h-20 bg-gray-200 hover:bg-sky-500/50 mx-2 rounded-md cursor-pointer">20</div>
+      <div class="flex justify-center items-center w-12 h-20 bg-gray-200 hover:bg-sky-500/50 mx-2 rounded-md cursor-pointer">40</div>
+      <div class="flex justify-center items-center w-12 h-20 bg-gray-200 hover:bg-sky-500/50 ml-2 rounded-md cursor-pointer">100</div>
+    </div>
+
+    <div data-js="current-option" class="flex justify-center">
+      You haven't estimated yet
+    </div>
+    <div data-js="result" class="flex justify-center my-10"></div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      var socket = io();
+
+      const options = document.querySelectorAll('[data-js="options"] div');
+      options.forEach(option => option.addEventListener('click', showOption));
+
+      function showOption() {
+        options.forEach(option => {
+          option.classList.remove('bg-sky-500/50');
+        });
+        socket.emit('selected:option', Number(this.innerHTML));
+        this.classList.add('bg-sky-500/50');
+      }
+
+      socket.on('users:count', (count) => {
+        const result = document.querySelector('[data-js="result"]');
+        result.innerHTML = '';
+        for (let i = 0; i < count; i++) {
+          result.innerHTML += '<div class="flex justify-center items-center w-12 h-20 bg-gray-200 mr-2 rounded-md cursor-pointer"></div>';
+        }
+      });
+
+      socket.on('selected:prices', (selectedPrices) => {
+        const selectedPrice = selectedPrices.find((o) => o.id === socket.id);
+        if(selectedPrice) {
+          const currentEstimate = document.querySelector('[data-js="current-option"]');
+          currentEstimate.innerHTML = `Your current estimate: ${selectedPrice.price}`;
+        }
+      });
+    </script>
+  </body>
+</html>
