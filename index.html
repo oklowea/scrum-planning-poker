@@ -51,9 +51,18 @@
 
       socket.on('selected:prices', (selectedPrices) => {
         const selectedPrice = selectedPrices.find((o) => o.id === socket.id);
-        if(selectedPrice) {
+        if (selectedPrice) {
           const currentEstimate = document.querySelector('[data-js="current-option"]');
           currentEstimate.innerHTML = `Your current estimate: ${selectedPrice.price}`;
+        }
+
+        for (let i = 0; i < selectedPrices.length; i++) {
+          const item = document.querySelector(`[data-js="result"] div:nth-child(${i + 1})`);
+          item.innerHTML = 'X';
+         if (selectedPrices[i].id === socket.id) {
+          item.classList.remove('bg-gray-200');
+          item.classList.add('bg-sky-500/50');
+         };
         }
       });
     </script>
