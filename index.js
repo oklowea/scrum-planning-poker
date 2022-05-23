@@ -37,6 +37,13 @@ io.on('connection', (socket) => {
     updateSelectedPrices();
   });
 
+  updateSelectedPrices();
+
+  socket.on('reset', () => {
+    selectedPrices = [];
+    updateSelectedPrices();
+  });
+
   socket.on('disconnect', () => {
     usersCount -= 1;
     updateUsersCount();

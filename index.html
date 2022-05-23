@@ -7,62 +7,144 @@
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body>
-    <div data-js="options" class="flex justify-center my-10">
-      <div class="flex justify-center items-center w-12 h-20 bg-gray-200 hover:bg-sky-500/50 mr-2 rounded-md cursor-pointer">0</div>
-      <div class="flex justify-center items-center w-12 h-20 bg-gray-200 hover:bg-sky-500/50 mx-2 rounded-md cursor-pointer">1/2</div>
-      <div class="flex justify-center items-center w-12 h-20 bg-gray-200 hover:bg-sky-500/50 mx-2 rounded-md cursor-pointer">1</div>
-      <div class="flex justify-center items-center w-12 h-20 bg-gray-200 hover:bg-sky-500/50 mx-2 rounded-md cursor-pointer">2</div>
-      <div class="flex justify-center items-center w-12 h-20 bg-gray-200 hover:bg-sky-500/50 mx-2 rounded-md cursor-pointer">3</div>
-      <div class="flex justify-center items-center w-12 h-20 bg-gray-200 hover:bg-sky-500/50 mx-2 rounded-md cursor-pointer">5</div>
-      <div class="flex justify-center items-center w-12 h-20 bg-gray-200 hover:bg-sky-500/50 mx-2 rounded-md cursor-pointer">8</div>
-      <div class="flex justify-center items-center w-12 h-20 bg-gray-200 hover:bg-sky-500/50 mx-2 rounded-md cursor-pointer">13</div>
-      <div class="flex justify-center items-center w-12 h-20 bg-gray-200 hover:bg-sky-500/50 mx-2 rounded-md cursor-pointer">20</div>
-      <div class="flex justify-center items-center w-12 h-20 bg-gray-200 hover:bg-sky-500/50 mx-2 rounded-md cursor-pointer">40</div>
-      <div class="flex justify-center items-center w-12 h-20 bg-gray-200 hover:bg-sky-500/50 ml-2 rounded-md cursor-pointer">100</div>
+    <div class="container mx-auto my-6">
+      <div class="grid grid-cols-7">
+        <div class="col-start-3 col-span-3">
+          <div class="flex justify-between items-center">
+            <div>Choose your estimate...</div>
+            <button data-js="reset" class="bg-gray-200 py-2 px-12 rounded-md flex justify-start items-center">
+              <div class="mr-2">
+                <svg data-name="Layer 1" id="Layer_1" width="24px" height="24px" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><path d="M218.39,320.61,246.77,349H157a93,93,0,0,1,0-186h18V133H157a123,123,0,0,0,0,246h89.77l-28.38,28.38,21.22,21.23L304.22,364l-64.61-64.61Z"/><path d="M355,133H265.23l28.38-28.38L272.39,83.39,207.78,148l64.61,64.61,21.22-21.22L265.23,163H355a93,93,0,0,1,0,186H336.44v30H355a123,123,0,0,0,0-246Z"/></svg>
+              </div>
+              Reset
+            </button>
+          </div>
+          <div data-js="options" class="flex justify-start my-6">
+            <div class="flex justify-center items-center w-12 h-20 bg-gray-200 hover:bg-sky-500/50 mr-2 rounded-md cursor-pointer">0</div>
+            <div class="flex justify-center items-center w-12 h-20 bg-gray-200 hover:bg-sky-500/50 mx-2 rounded-md cursor-pointer">1/2</div>
+            <div class="flex justify-center items-center w-12 h-20 bg-gray-200 hover:bg-sky-500/50 mx-2 rounded-md cursor-pointer">1</div>
+            <div class="flex justify-center items-center w-12 h-20 bg-gray-200 hover:bg-sky-500/50 mx-2 rounded-md cursor-pointer">2</div>
+            <div class="flex justify-center items-center w-12 h-20 bg-gray-200 hover:bg-sky-500/50 mx-2 rounded-md cursor-pointer">3</div>
+            <div class="flex justify-center items-center w-12 h-20 bg-gray-200 hover:bg-sky-500/50 mx-2 rounded-md cursor-pointer">5</div>
+            <div class="flex justify-center items-center w-12 h-20 bg-gray-200 hover:bg-sky-500/50 mx-2 rounded-md cursor-pointer">8</div>
+            <div class="flex justify-center items-center w-12 h-20 bg-gray-200 hover:bg-sky-500/50 mx-2 rounded-md cursor-pointer">13</div>
+            <div class="flex justify-center items-center w-12 h-20 bg-gray-200 hover:bg-sky-500/50 mx-2 rounded-md cursor-pointer">20</div>
+            <div class="flex justify-center items-center w-12 h-20 bg-gray-200 hover:bg-sky-500/50 mx-2 rounded-md cursor-pointer">40</div>
+            <div class="flex justify-center items-center w-12 h-20 bg-gray-200 hover:bg-sky-500/50 ml-2 rounded-md cursor-pointer">100</div>
+          </div>
+      
+          <div data-js="current-option">You haven't estimated yet</div>
+          <div data-js="result" class="flex justify-start my-6"></div>
+          <div data-js="average" class="flex justify-start"></div>
+        </div>
+      </div>
     </div>
-
-    <div data-js="current-option" class="flex justify-center">
-      You haven't estimated yet
-    </div>
-    <div data-js="result" class="flex justify-center my-10"></div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
       var socket = io();
+      let usersCount = 0;
+      let result = '';
+
+      const reset = document.querySelector('[data-js="reset"]');
+      reset.addEventListener('click', resetValues)
+
+      function resetValues() {
+        socket.emit('reset');
+      }
 
       const options = document.querySelectorAll('[data-js="options"] div');
       options.forEach(option => option.addEventListener('click', showOption));
 
       function showOption() {
+        if(result) {
+          return;
+        }
+
         options.forEach(option => {
           option.classList.remove('bg-sky-500/50');
         });
-        socket.emit('selected:option', Number(this.innerHTML));
+
+        if(this.innerHTML === '1/2') {
+          socket.emit('selected:option', 0.5);
+        } else {
+          socket.emit('selected:option', Number(this.innerHTML));
+        }
+
         this.classList.add('bg-sky-500/50');
       }
 
       socket.on('users:count', (count) => {
+        usersCount = count;
         const result = document.querySelector('[data-js="result"]');
         result.innerHTML = '';
-        for (let i = 0; i < count; i++) {
+        for (let i = 0; i < usersCount; i++) {
           result.innerHTML += '<div class="flex justify-center items-center w-12 h-20 bg-gray-200 mr-2 rounded-md cursor-pointer"></div>';
         }
       });
 
       socket.on('selected:prices', (selectedPrices) => {
-        const selectedPrice = selectedPrices.find((o) => o.id === socket.id);
-        if (selectedPrice) {
-          const currentEstimate = document.querySelector('[data-js="current-option"]');
-          currentEstimate.innerHTML = `Your current estimate: ${selectedPrice.price}`;
-        }
+        if(selectedPrices.length) {
+          const selectedPrice = selectedPrices.find((o) => o.id === socket.id);
+          if (selectedPrice) {
+            const currentEstimate = document.querySelector('[data-js="current-option"]');
 
-        for (let i = 0; i < selectedPrices.length; i++) {
-          const item = document.querySelector(`[data-js="result"] div:nth-child(${i + 1})`);
-          item.innerHTML = 'X';
-         if (selectedPrices[i].id === socket.id) {
-          item.classList.remove('bg-gray-200');
-          item.classList.add('bg-sky-500/50');
-         };
+            if(selectedPrice.price === 0.5) {
+              currentEstimate.innerHTML = 'Your current estimate: 1/2';
+            } else {
+              currentEstimate.innerHTML = `Your current estimate: ${selectedPrice.price}`;
+            }
+          }
+
+          for (let i = 0; i < selectedPrices.length; i++) { 
+            const item = document.querySelector(`[data-js="result"] div:nth-child(${i + 1})`);
+            item.innerHTML = 'X';
+            if (selectedPrices[i].id === socket.id) {
+              item.classList.remove('bg-gray-200');
+              item.classList.add('bg-sky-500/50');
+            }
+          }
+
+          const average = document.querySelector('[data-js="average"]');
+          if (usersCount === selectedPrices.length ) {
+            let summa = 0;
+            for (let i = 0; i < selectedPrices.length; i++) {
+              const item = document.querySelector(`[data-js="result"] div:nth-child(${i + 1})`);
+              if(selectedPrices[i].price === 0.5) {
+                item.innerHTML = '1/2';
+              } else {
+                item.innerHTML = selectedPrices[i].price;
+              }
+              summa += selectedPrices[i].price;
+            }
+
+            result = summa / selectedPrices.length;
+            if (Math.ceil(result) === result) {
+              average.innerHTML = `Average: ${result}`;
+            } else {
+              average.innerHTML = `Average: ${Math.ceil(result)} (${result})`;
+            }
+          } else {
+            average.innerHTML = '';
+          }
+        } else {
+          const options = document.querySelectorAll('[data-js="options"] div');
+          options.forEach(option => {
+            option.classList.remove('bg-sky-500/50');
+          });
+
+          const currentEstimate = document.querySelector('[data-js="current-option"]');
+          currentEstimate.innerHTML = `You haven't estimated yet`;
+
+          const items = document.querySelectorAll('[data-js="result"] div');
+          items.forEach(item => {
+            item.innerHTML = '';
+            item.classList.add('bg-gray-200');
+            item.classList.remove('bg-sky-500/50');
+          });
+
+          const average = document.querySelector('[data-js="average"]');
+          average.innerHTML = '';
         }
       });
     </script>
