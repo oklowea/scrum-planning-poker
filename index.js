@@ -27,11 +27,15 @@ io.on('connection', (socket) => {
   updateUsersCount();
 
   socket.on('selected:option', (price) => {
-    const selectedPrice = selectedPrices.find((o) => o.id === socket.id);
-    if (selectedPrice) {
-      selectedPrice.price = price;
+    if (price === null) {
+      selectedPrices = selectedPrices.filter((o) => o.id !== socket.id);
     } else {
-      selectedPrices.push({ id: socket.id, price });
+      const selectedPrice = selectedPrices.find((o) => o.id === socket.id);
+      if (selectedPrice) {
+        selectedPrice.price = price;
+      } else {
+        selectedPrices.push({ id: socket.id, price });
+      }
     }
 
     updateSelectedPrices();
@@ -40,7 +44,7 @@ io.on('connection', (socket) => {
   updateSelectedPrices();
 
   socket.on('reset', () => {
-    selectedPrices = [];
+    selectedPrices = selectedPrices.filter((o) => o.price === -1);
     updateSelectedPrices();
   });
 
