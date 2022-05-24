@@ -57,7 +57,7 @@ io.on('connection', (socket) => {
   });
 });
 
-server.listen(3000, () => {
+server.listen(80, () => {
   // eslint-disable-next-line no-console
-  console.log('listening on *:3000');
+  console.log('listening on *:80');
 });
