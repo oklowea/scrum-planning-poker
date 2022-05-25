@@ -10,6 +10,8 @@ const io = new Server(server);
 let usersCount = 0;
 let selectedPrices = [];
 
+app.use(express.static('src'));
+
 function updateUsersCount() {
   io.emit('users:count', usersCount);
 }
